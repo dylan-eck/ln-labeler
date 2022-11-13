@@ -1,0 +1,105 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300&family=Roboto:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 500;
+}
+
+.signin-container {
+  height: 80vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.main-logo {
+  font-size: 5em;
+  text-align: center;
+  padding: 10px;
+}
+
+.signin-button {
+  border-radius: 10px;
+  border: none;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
+  background-color: #aeaeae;
+}
+
+.top-bar {
+  height: 7vh;
+  background-color: #f8f8f8;
+  box-shadow: 0 8px 4px -4px #ddd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.top-bar ul {
+  list-style: none;
+  display: flex;
+}
+
+.top-bar li {
+  margin-right: 3em;
+}
+
+.label-container {
+  height: 93vh;
+}
+
+.viewport {
+  width: 70%;
+  height: 93vh;
+  background-color: rgb(187, 187, 187);
+  background-image: url('/sample_image.jpg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  font-size: 2em;
+  font-weight: 600;
+}
+
+.logo img {
+  width: 30px;
+  height: 30px;
+  margin: 10px;
+}
+
+.signout-button {
+  border: none;
+  padding: 20px;
+  background-color: inherit;
+  height: 100%
+}
+
+.signout-button:hover {
+  background-color: red;
+}
+
+.contract-input {
+  border: none;
+  background-color: inherit;
+  border-bottom: 2px solid black;
+}
+
+.contract-input:focus {
+  outline-width: 0px;
+}
