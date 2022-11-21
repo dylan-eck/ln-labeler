@@ -9,6 +9,12 @@
   font-weight: 500;
 }
 
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
 .signin-container {
   height: 80vh;
   display: flex;
@@ -58,16 +64,34 @@
 
 .label-container {
   height: 93vh;
+  display: flex;
 }
 
 .viewport {
+  position: relative;
   width: 70%;
   height: 93vh;
-  background-color: rgb(187, 187, 187);
-  background-image: url('/sample_image.jpg');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
+  background-color: rgb(183, 183, 183);
+}
+
+.editor-container {
+  width: 30%;
+  height: 93vh;
+}
+
+.region-list {
+  height: 10vh;
+  background-color: red;
+}
+
+.desc-editor {
+  height: 73vh;
+  background-color: yellow;
+}
+
+.button-container {
+  height: 10vh;
+  background-color: green;
 }
 
 .logo {

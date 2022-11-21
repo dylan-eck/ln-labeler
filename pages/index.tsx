@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import {
   Near,
   keyStores,
@@ -19,119 +19,15 @@ import "@near-wallet-selector/modal-ui/styles.css";
 import axios from "axios";
 import { css } from "@emotion/react";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 
-const MARKER_RADIUS = 10;
+const Viewport = dynamic(() => import("../components/Viewport"), {
+  ssr: false,
+});
 
-interface Point {
-  x: number;
-  y: number;
-}
+const IMAGE_URL = "/sample-image-0.jpg";
 
 export default function Home() {
-  // const [canvas, setCanvas] = useState<HTMLCanvasElement>();
-  // const [context, setContext] = useState<CanvasRenderingContext2D>();
-  // const [points, setPoints] = useState<Point[]>([]);
-
-  // useEffect(() => {
-  //   if (canvas && context) return;
-
-  //   const canvasElement = document.getElementById(
-  //     "viewport"
-  //   ) as HTMLCanvasElement;
-  //   if (!canvasElement) return;
-
-  //   const graphicsContext = canvasElement.getContext("2d");
-  //   if (!graphicsContext) return;
-
-  //   setCanvas(canvasElement);
-  //   setContext(graphicsContext);
-  // }, [canvas, context]);
-
-  // const clearRegion = () => {
-  //   if (!canvas || !context) return;
-  //   context.clearRect(0, 0, canvas.width, canvas.height);
-  //   setPoints(() => []);
-  // };
-
-  // useEffect(() => {
-  //   if (!canvas || !context || !points.length) return;
-
-  //   context.clearRect(0, 0, canvas.width, canvas.height);
-
-  //   context.strokeStyle = "#00FF00";
-  //   context.fillStyle = "rgba(0, 255, 0, 0.5)";
-
-  //   let closed = false;
-  //   if (points.length >= 1) {
-  //     const start = points[0];
-  //     const end = points[points.length - 1];
-
-  //     const dist = Math.sqrt(
-  //       Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2)
-  //     );
-  //     if (dist < MARKER_RADIUS) {
-  //       points[points.length - 1] = points[0];
-  //       console.log();
-  //       closed = true;
-  //     }
-  //   }
-
-  //   points.map((point: Point) => {
-  //     context.setLineDash([4, 4]);
-  //     context.beginPath();
-  //     context.arc(point.x, point.y, MARKER_RADIUS, 0, 2 * Math.PI);
-  //     context.stroke();
-  //   });
-
-  //   context.setLineDash([]);
-  //   context.beginPath();
-  //   context.moveTo(points[0].x, points[0].y);
-  //   for (let i = 1; i < points.length; i++) {
-  //     context.lineTo(points[i].x, points[i].y);
-  //   }
-  //   context.stroke();
-  //   if (closed) {
-  //     context.fill();
-  //   }
-  // }, [canvas, context, points]);
-
-  // const handleClick = useCallback((event: any) => {
-  //   const bounds = event.target.getBoundingClientRect();
-  //   let clickPos = {
-  //     x: Math.round(event.clientX - bounds.left),
-  //     y: Math.round(event.clientY - bounds.top),
-  //   };
-  //   setPoints((points) => [...points, clickPos]);
-  // }, []);
-
-  // return (
-  //   <div id="root">
-  //     <div
-  //       css={css`
-  //         width: 100%;
-  //         display: flex;
-  //         justify-content: space-between;
-  //       `}
-  //     >
-  //       <div></div>
-  //       <button onClick={clearRegion}>clear selection</button>
-  //     </div>
-  //     <canvas
-  //       css={css`
-  //         border: 1px solid black;
-  //         background-image: url("/sample_image.jpg");
-  //         background-size: 100% 100%;
-  //       `}
-  //       id="viewport"
-  //       width="1000"
-  //       height="750"
-  //       onClick={handleClick}
-  //     />
-  //   </div>
-  // );
-
-  ///////////////////
-
   const [walletSelector, setWalletSelector] = useState<WalletSelector>();
   const [nearConnection, setNearConnection] = useState<Near>();
   const [nearAccount, setNearAccount] = useState<Account>();
@@ -262,10 +158,11 @@ export default function Home() {
         </button>
       </div>
       <div className="label-container">
-        <div className="viewport"></div>
+        <Viewport />
         <div className="editor-container">
           <div className="region-list"></div>
           <div className="desc-editor"></div>
+          <div className="button-container"></div>
         </div>
       </div>
     </div>
