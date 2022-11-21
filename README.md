@@ -12,7 +12,7 @@ Labeler NearBy is a web3 application created by me and @MehmetMHY for the 2022 N
 
 ## About This Repository:
 
-This repository contains the frontend code for Labeler NearBy. The frontend authenticates users using NEAR and provides an interface for labeling images.
+This repository contains the frontend code for Labeler NearBy. The frontend authenticates users using NEAR and provides an interface for labeling images. The backend can be found at [https://github.com/MehmetMHY/ln-researcher](https://github.com/MehmetMHY/ln-researcher)
 
 ## How to run locally (development server):
 
