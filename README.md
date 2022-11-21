@@ -6,6 +6,8 @@
 
 ---
 
+!!! NOTE: This repository is not a finished product, while quite a bit of work has been completed, not all intended functionality is implemented currently
+
 ## About Labeler NearBy:
 
 Labeler NearBy is a web3 application created by me and @MehmetMHY for the 2022 NEAR MetaBUILD III hackathon. Labeler NearBy aims to provide a platform for AI researchers to connect directly with, and get their data labeled by, quality data labelers.
