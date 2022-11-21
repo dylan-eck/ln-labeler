@@ -6,13 +6,20 @@ import "@recogito/annotorious/dist/annotorious.min.css";
 
 export default function Viewport({
   activeLabel,
+  setSubmissionData,
 }: {
   activeLabel: string | undefined;
+  setSubmissionData: any;
 }) {
   const [anno, setAnno] = useState<any>();
   const [tool, setTool] = useState<string>("rect");
   const [labels, setLabels] = useState<any>({});
   const [createdAnnotation, setCreatedAnnotation] = useState<any>();
+
+  useEffect(() => {
+    if (!labels) return;
+    setSubmissionData(labels);
+  }, [labels, setSubmissionData]);
 
   useEffect(() => {
     if (!activeLabel) {
@@ -98,7 +105,7 @@ export default function Viewport({
   return (
     <>
       <button className="tool-button" onClick={toggleTool}>
-        {tool === "rect" ? "RECT" : "POLY"}
+        SELECTION MODE: {tool === "rect" ? "RECTANGLE" : "POLYGON"}
       </button>
       <div id="openseadragon" style={{ width: "100%", height: "100%" }}></div>
     </>

@@ -13,6 +13,7 @@ export default function LabelWorkspace({
   jobDescription: string;
 }) {
   const [activeLabel, setActiveLabel] = useState<string>();
+  const [submissionData, setSubmissionData] = useState<string>();
 
   return (
     <>
@@ -43,7 +44,10 @@ export default function LabelWorkspace({
       </div>
       <div style={{ width: "100%", height: "100%", display: "flex" }}>
         <div style={{ width: "70%", height: "94%", overflow: "hidden" }}>
-          <Viewport activeLabel={activeLabel} />
+          <Viewport
+            activeLabel={activeLabel}
+            setSubmissionData={setSubmissionData}
+          />
         </div>
         <div id="side-bar" className="side-bar">
           <div className="desc-panel">
@@ -51,7 +55,7 @@ export default function LabelWorkspace({
             <div className="desc-body">{jobDescription}</div>
           </div>
           <div className="button-container">
-            <button>SUBMIT</button>
+            <button onClick={() => console.log(submissionData)}>SUBMIT</button>
           </div>
         </div>
       </div>
