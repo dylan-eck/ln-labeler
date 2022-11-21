@@ -17,15 +17,11 @@ import {
 import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
 import "@near-wallet-selector/modal-ui/styles.css";
 import axios from "axios";
-import { css } from "@emotion/react";
 import Image from "next/image";
-import dynamic from "next/dynamic";
 
-const Viewport = dynamic(() => import("../components/Viewport"), {
-  ssr: false,
-});
-
-const IMAGE_URL = "/sample-image-0.jpg";
+import LabelWorkspace from "../components/LabelWorkspace";
+import ContractSelector from "../components/ContractSelector";
+import TopBar from "../components/TopBar";
 
 export default function Home() {
   const [walletSelector, setWalletSelector] = useState<WalletSelector>();
@@ -36,6 +32,50 @@ export default function Home() {
   const [wallet, setWallet] = useState<Wallet>();
   const [balanceYoctoNear, setBalanceYoctoNear] = useState<string>();
   const [nearPrice, setNearPrice] = useState<number>();
+  const [smartContract, setSmartContract] = useState<string>();
+  const [labelKeys, setLabelKeys] = useState<string[]>([]);
+  const [jobDescription, setJobDescription] = useState<string>("");
+
+  // placeholder
+  const requestTask = async () => {
+    await setTimeout(() => {}, 10000);
+
+    return {
+      url: "<server-url>",
+      id: "<job-id>",
+      label_keys: ["apple", "banana"],
+      task: {
+        type: "label",
+        assigned_to: "pitaya.testnet",
+        public_key: "rsa-key",
+        time_assignmend: "<epoch-time-ns>",
+      },
+    };
+  };
+
+  // placeholder
+  const fetchImageAndDescription = async () => {
+    await setTimeout(() => {}, 10000);
+
+    return {
+      image: null,
+      job_description:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam in porta nunc, sed fringilla augue. Cras nec dui urna. Vivamus et bibendum arcu. Donec arcu ex, aliquet vel nulla vel, porta ullamcorper diam. Pellentesque suscipit, ipsum eget vestibulum congue, arcu turpis viverra lorem, vitae interdum massa velit quis augue. Sed ornare diam at cursus tincidunt. Nullam arcu lorem, fringilla sed vehicula mattis, egestas ac nisi. Nunc molestie nulla augue, vel pellentesque eros lobortis vel. Morbi at lacus ut turpis dignissim efficitur in a massa. Duis pellentesque in quam vitae pharetra. Duis ac ex metus. Curabitur facilisis erat in eros ultrices, et volutpat eros tincidunt. Aenean vulputate enim a justo elementum convallis.",
+    };
+  };
+
+  useEffect(() => {
+    if (!smartContract) return;
+
+    requestTask()
+      .then((response) => {
+        setLabelKeys(response.label_keys);
+      })
+      .then(() => fetchImageAndDescription())
+      .then((response) => {
+        setJobDescription(response.job_description);
+      });
+  }, [smartContract]);
 
   useEffect(() => {
     const keyStore = new keyStores.BrowserLocalStorageKeyStore();
@@ -111,6 +151,22 @@ export default function Home() {
     setAccountId(undefined);
   };
 
+  const contractIsValid = async (contractId: string): Promise<boolean> => {
+    if (!nearConnection) return false;
+
+    try {
+      const account = await nearConnection.account(contractId);
+      await account.state(); // will error if account doesn't exist
+    } catch (err: any) {
+      // throw any error unrelated to the account not existing
+      if (!err.message.includes("does not exist while viewing")) {
+        throw err;
+      }
+      return false;
+    }
+    return true;
+  };
+
   if (!signedIn) {
     return (
       <div className="signin-container">
@@ -132,16 +188,21 @@ export default function Home() {
 
   return (
     <div className="container">
-      <div className="top-bar">
-        <div className="logo">
-          <Image
-            src="/ln-logo.png"
-            width="638"
-            height="638"
-            alt="Labeler NearBy logo"
+      <TopBar onClick={signOut} />
+      <div className="workspace-container">
+        {smartContract ? (
+          <LabelWorkspace
+            labelKeys={labelKeys}
+            jobDescription={jobDescription}
           />
-          <div>Labeler NearBy</div>
-        </div>
+        ) : (
+          <ContractSelector
+            validator={contractIsValid}
+            setter={setSmartContract}
+          />
+        )}
+      </div>
+      <div className="bottom-bar">
         <ul>
           <li>Account: {accountId}</li>
           <li>
@@ -149,20 +210,9 @@ export default function Home() {
             {(Number(balanceYoctoNear) / Math.pow(10, 24)).toFixed(2)}
           </li>
           <li>Near Price: ${nearPrice?.toFixed(2)} </li>
-          <li>
-            Contract: <input className="contract-input" type="text"></input>
-          </li>
         </ul>
-        <button className="signout-button" onClick={signOut}>
-          SIGN OUT
-        </button>
-      </div>
-      <div className="label-container">
-        <Viewport />
-        <div className="editor-container">
-          <div className="region-list"></div>
-          <div className="desc-editor"></div>
-          <div className="button-container"></div>
+        <div className="contract-name">
+          {smartContract ? `Contract: ${smartContract}` : ""}
         </div>
       </div>
     </div>
