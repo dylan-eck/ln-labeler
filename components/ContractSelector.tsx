@@ -1,24 +1,13 @@
 import { useRef } from "react";
 
-export default function ContractSelector({
-  validator,
-  setter,
-}: {
-  validator: (contractId: string) => Promise<boolean>;
-  setter: any;
-}) {
+export default function ContractSelector({ setter }: { setter: any }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
       if (inputRef.current) {
         const id = inputRef.current.value;
-        validator(id).then((isValid: boolean) => {
-          console.log(`contract valid?: ${isValid}`);
-          if (isValid) {
-            setter(id);
-          }
-        });
+        setter(id);
       }
     }
   };

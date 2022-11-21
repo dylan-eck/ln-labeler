@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -20,6 +20,7 @@
     "@types/react": "18.0.25",
     "@types/react-dom": "18.0.8",
     "babel": "^6.23.0",
+    "crypto": "^1.0.1",
     "eslint": "8.27.0",
     "eslint-config-next": "13.0.2",
     "labeler": "^5.0.0",

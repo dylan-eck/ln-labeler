@@ -5,7 +5,7 @@ import {
   connect,
   ConnectConfig,
   Account,
-  utils,
+  providers,
 } from "near-api-js";
 import { setupModal } from "@near-wallet-selector/modal-ui";
 import MyNearIconUrl from "@near-wallet-selector/my-near-wallet/assets/my-near-wallet-icon.png";
@@ -32,25 +32,41 @@ export default function Home() {
   const [wallet, setWallet] = useState<Wallet>();
   const [balanceYoctoNear, setBalanceYoctoNear] = useState<string>();
   const [nearPrice, setNearPrice] = useState<number>();
-  const [smartContract, setSmartContract] = useState<string>();
+  const [contractId, setContractId] = useState<string>();
+  const [contractAccount, setContractAccount] = useState<Account>();
   const [labelKeys, setLabelKeys] = useState<string[]>([]);
   const [jobDescription, setJobDescription] = useState<string>("");
+  const [task, setTask] = useState<any>();
+  const [rsaKeyPair, setRsaKeyPair] = useState({ public: "", private: "" });
+  const [initialized, setInitialized] = useState(false);
 
   // placeholder
   const requestTask = async () => {
-    await setTimeout(() => {}, 10000);
-
     return {
       url: "<server-url>",
       id: "<job-id>",
-      label_keys: ["apple", "banana"],
+      label_keys: ["corn plant"],
       task: {
         type: "label",
         assigned_to: "pitaya.testnet",
-        public_key: "rsa-key",
-        time_assignmend: "<epoch-time-ns>",
+        time_assigned: "<epoch-time-ns>",
       },
     };
+  };
+
+  // placeholder
+  const submitTask = async () => {
+    await setTimeout(() => {}, 10000);
+
+    console.log({
+      job_id: "",
+      submission: {
+        ...task,
+        public_key: "<rsa-key>",
+        time_submitted: "<epoch-time-ns>",
+        data: "<submission-data>",
+      },
+    });
   };
 
   // placeholder
@@ -65,57 +81,65 @@ export default function Home() {
   };
 
   useEffect(() => {
-    if (!smartContract) return;
+    if (initialized) return;
 
-    requestTask()
-      .then((response) => {
-        setLabelKeys(response.label_keys);
-      })
-      .then(() => fetchImageAndDescription())
-      .then((response) => {
-        setJobDescription(response.job_description);
-      });
-  }, [smartContract]);
+    let accountId: string;
 
-  useEffect(() => {
-    const keyStore = new keyStores.BrowserLocalStorageKeyStore();
-    const config: ConnectConfig = {
-      networkId: "testnet",
-      keyStore: keyStore, // first create a key store
-      nodeUrl: "https://rpc.testnet.near.org",
-      walletUrl: "https://wallet.testnet.near.org",
-      helperUrl: "https://helper.testnet.near.org",
-      headers: {},
-    };
-    connect(config).then((nearConnection) => {
-      setNearConnection(nearConnection);
-    });
-  }, []);
-
-  useEffect(() => {
-    if (walletSelector) return;
     setupWalletSelector({
       network: "testnet",
       modules: [setupMyNearWallet({ iconUrl: MyNearIconUrl.src })],
-    }).then((walletSelector) => {
-      setWalletSelector(walletSelector);
-      setSignedIn(walletSelector.isSignedIn());
-    });
-  }, [walletSelector]);
+    })
+      .then((walletSelector) => {
+        setWalletSelector(walletSelector);
+        setSignedIn(walletSelector.isSignedIn());
+        walletSelector.wallet().then((wallet: any) => {
+          setWallet(wallet);
+        });
+        accountId = walletSelector.store.getState().accounts[0].accountId;
+        setAccountId(accountId);
 
-  useEffect(() => {
-    if (!walletSelector || !signedIn) return;
-    walletSelector.wallet().then((wallet: any) => {
-      setWallet(wallet);
-    });
-    const accountId = walletSelector.store.getState().accounts[0].accountId;
-    setAccountId(accountId);
-  }, [walletSelector, signedIn]);
+        axios({
+          method: "GET",
+          url: "/api/keypair",
+        }).then((response: any) => {
+          setRsaKeyPair({
+            public: response.data.public,
+            private: response.data.private,
+          });
+        });
+      })
+      .then(() => {
+        const keyStore = new keyStores.BrowserLocalStorageKeyStore();
+        const config: ConnectConfig = {
+          networkId: "testnet",
+          keyStore: keyStore, // first create a key store
+          nodeUrl: "https://rpc.testnet.near.org",
+          walletUrl: "https://wallet.testnet.near.org",
+          helperUrl: "https://helper.testnet.near.org",
+          headers: {},
+        };
+        connect(config).then((nearConnection) => {
+          setNearConnection(nearConnection);
+
+          nearConnection.account(accountId).then((account: Account) => {
+            setNearAccount(account);
+            account.getAccountBalance().then((balance_yoctonear) => {
+              setBalanceYoctoNear(balance_yoctonear.total);
+            });
+          });
+        });
+      });
+    setInitialized(true);
+  }, [initialized]);
 
   useEffect(() => {
     if (!nearConnection || !accountId) return;
     nearConnection.account(accountId).then((account: Account) => {
       setNearAccount(account);
+
+      account.getAccountBalance().then((balance_yoctonear) => {
+        setBalanceYoctoNear(balance_yoctonear.total);
+      });
     });
   }, [nearConnection, accountId]);
 
@@ -128,17 +152,10 @@ export default function Home() {
     });
   }, []);
 
-  useEffect(() => {
-    if (!nearAccount) return;
-    nearAccount.getAccountBalance().then((balance_yoctonear) => {
-      setBalanceYoctoNear(balance_yoctonear.total);
-    });
-  }, [nearAccount]);
-
   const signIn = () => {
     const desc = "Please select a wallet to sign in.";
     const modal = setupModal(walletSelector!, {
-      contractId: "dev-1667967060158-21012588686479",
+      contractId: "dev-1669013049236-11804026617018",
       description: desc,
     });
     modal.show();
@@ -151,21 +168,47 @@ export default function Home() {
     setAccountId(undefined);
   };
 
-  const contractIsValid = async (contractId: string): Promise<boolean> => {
-    if (!nearConnection) return false;
+  useEffect(() => {
+    if (!nearConnection || !contractId) return;
 
-    try {
-      const account = await nearConnection.account(contractId);
-      await account.state(); // will error if account doesn't exist
-    } catch (err: any) {
-      // throw any error unrelated to the account not existing
-      if (!err.message.includes("does not exist while viewing")) {
-        throw err;
+    const contractIsValid = async (contractId: string): Promise<boolean> => {
+      if (!nearConnection) return false;
+
+      try {
+        const account = await nearConnection.account(contractId);
+        await account.state(); // will error if account doesn't exist
+      } catch (err: any) {
+        // throw any error unrelated to the account not existing
+        if (!err.message.includes("does not exist while viewing")) {
+          throw err;
+        }
+        return false;
       }
-      return false;
-    }
-    return true;
-  };
+      return true;
+    };
+
+    contractIsValid(contractId).then((valid) => {
+      if (valid) {
+        nearConnection
+          .account(contractId)
+          .then((account: Account) => setContractAccount(account));
+      }
+    });
+  }, [nearConnection, contractId]);
+
+  useEffect(() => {
+    if (!contractId) return;
+
+    requestTask()
+      .then((response) => {
+        setLabelKeys(response.label_keys);
+        setTask(response.task);
+      })
+      .then(() => fetchImageAndDescription())
+      .then((response) => {
+        setJobDescription(response.job_description);
+      });
+  }, [contractId]);
 
   if (!signedIn) {
     return (
@@ -190,16 +233,13 @@ export default function Home() {
     <div className="container">
       <TopBar onClick={signOut} />
       <div className="workspace-container">
-        {smartContract ? (
+        {contractId ? (
           <LabelWorkspace
             labelKeys={labelKeys}
             jobDescription={jobDescription}
           />
         ) : (
-          <ContractSelector
-            validator={contractIsValid}
-            setter={setSmartContract}
-          />
+          <ContractSelector setter={setContractId} />
         )}
       </div>
       <div className="bottom-bar">
@@ -212,7 +252,7 @@ export default function Home() {
           <li>Near Price: ${nearPrice?.toFixed(2)} </li>
         </ul>
         <div className="contract-name">
-          {smartContract ? `Contract: ${smartContract}` : ""}
+          {contractAccount ? `Contract: ${contractId}` : ""}
         </div>
       </div>
     </div>
