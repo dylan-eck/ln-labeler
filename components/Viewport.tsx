@@ -88,7 +88,7 @@ export default function Viewport({
       showNavigationControl: false,
     });
 
-    var an = Annotorious(viewer, {});
+    var an = Annotorious(viewer, { widgets: ["COMMENT"] });
 
     an.setVisible(false);
 
