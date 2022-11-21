@@ -6,7 +6,8 @@
 
 ---
 
-!!! NOTE: This repository is not a finished product, while quite a bit of work has been completed, not all intended functionality is implemented currently
+## ⚠️ WARNING:
+- (11-21-2022) This repository is not a finished product, while quite a bit of work has been completed, not all intended functionality is implemented currently
 
 ## About Labeler NearBy:
 
