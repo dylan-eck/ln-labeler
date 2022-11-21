@@ -45,7 +45,7 @@ export default function Home() {
     return {
       url: "<server-url>",
       id: "<job-id>",
-      label_keys: ["corn plant"],
+      label_keys: ["corn plant", "grass", "dirt"],
       task: {
         type: "label",
         assigned_to: "pitaya.testnet",
