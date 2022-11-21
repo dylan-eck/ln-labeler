@@ -1,11 +1,69 @@
 import Image from "next/image";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import OpenSeadragon from "openseadragon";
 import * as Annotorious from "@recogito/annotorious-openseadragon";
 import "@recogito/annotorious/dist/annotorious.min.css";
 
-export default function Viewport() {
-  const [labels, setLabels] = useState<any>([]);
+export default function Viewport({
+  activeLabel,
+}: {
+  activeLabel: string | undefined;
+}) {
+  const [anno, setAnno] = useState<any>();
+  const [tool, setTool] = useState<string>("rect");
+  const [labels, setLabels] = useState<any>({});
+  const [createdAnnotation, setCreatedAnnotation] = useState<any>();
+
+  useEffect(() => {
+    if (!activeLabel) {
+      if (anno) {
+        anno.setVisible(false);
+      }
+      return;
+    }
+
+    if (!anno) return;
+    anno.clearAnnotations();
+
+    if (labels[activeLabel]) {
+      labels[activeLabel].map((label: any) => {
+        anno.addAnnotation(label);
+      });
+    }
+
+    anno.setVisible(true);
+  }, [anno, activeLabel, labels]);
+
+  const toggleTool = () => {
+    if (tool === "rect") {
+      setTool("polygon");
+      anno.setDrawingTool("polygon");
+    } else {
+      setTool("rect");
+      anno.setDrawingTool("rect");
+    }
+  };
+
+  useEffect(() => {
+    if (!createdAnnotation || !activeLabel) return;
+
+    if (!labels[activeLabel]) {
+      setLabels((prev: any) => ({
+        ...prev,
+        [activeLabel]: [Object.assign({}, createdAnnotation)],
+      }));
+    } else {
+      setLabels((prev: any) => {
+        let next = Object.assign({}, prev);
+        next[activeLabel] = [
+          ...prev[activeLabel],
+          Object.assign({}, createdAnnotation),
+        ];
+        return next;
+      });
+    }
+    setCreatedAnnotation(undefined);
+  }, [createdAnnotation, activeLabel, labels]);
 
   useEffect(() => {
     let viewer = OpenSeadragon({
@@ -23,36 +81,26 @@ export default function Viewport() {
       showNavigationControl: false,
     });
 
-    var anno = Annotorious(viewer, {});
+    var an = Annotorious(viewer, {});
 
-    anno.on("createAnnotation", (annotation: any) => {
-      setLabels(() => [...labels, annotation]);
-      console.log(`created new label: ${annotation.id}`);
-      console.log(annotation);
-    });
+    an.setVisible(false);
 
-    anno.on("updateAnnotation", (annotation: any) => {
-      setLabels(() => {
-        const toUpdate = labels.findIndex(
-          (label: any) => label.id === annotation.id
-        );
-        labels[toUpdate] = annotation;
-        return labels;
-      });
-      console.log(`updated label: ${annotation.id}`);
-    });
+    an.on("createAnnotation", (annotation: any) =>
+      setCreatedAnnotation(annotation)
+    );
 
-    anno.on("deleteAnnotation", (annotation: any) => {
-      setLabels(() =>
-        labels.filter((label: any) => {
-          label.id != annotation.id;
-        })
-      );
-      console.log(`deleted label: ${annotation.id}`);
-    });
-  }, [labels]);
+    setAnno(an);
+    return () => {
+      an.destroy();
+    };
+  }, []);
 
   return (
-    <div id="openseadragon" style={{ width: "100%", height: "94%" }}></div>
+    <>
+      <button className="tool-button" onClick={toggleTool}>
+        {tool === "rect" ? "RECT" : "POLY"}
+      </button>
+      <div id="openseadragon" style={{ width: "100%", height: "100%" }}></div>
+    </>
   );
 }
