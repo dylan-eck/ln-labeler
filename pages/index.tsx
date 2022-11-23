@@ -38,8 +38,6 @@ export default function Home() {
   const [jobDescription, setJobDescription] = useState<string>("");
   const [task, setTask] = useState<any>();
   const [rsaKeyPair, setRsaKeyPair] = useState({ public: "", private: "" });
-  const [initialized, setInitialized] = useState(false);
-
   // placeholder
   const requestTask = async () => {
     return {
@@ -81,56 +79,58 @@ export default function Home() {
   };
 
   useEffect(() => {
-    if (initialized) return;
-
-    let accountId: string;
-
+    if (walletSelector) return;
     setupWalletSelector({
       network: "testnet",
       modules: [setupMyNearWallet({ iconUrl: MyNearIconUrl.src })],
-    })
-      .then((walletSelector) => {
-        setWalletSelector(walletSelector);
-        setSignedIn(walletSelector.isSignedIn());
-        walletSelector.wallet().then((wallet: any) => {
-          setWallet(wallet);
-        });
-        accountId = walletSelector.store.getState().accounts[0].accountId;
-        setAccountId(accountId);
+    }).then((walletSelector) => {
+      setWalletSelector(walletSelector);
+      setSignedIn(walletSelector.isSignedIn());
+      walletSelector.wallet().then((wallet: any) => {
+        setWallet(wallet);
+      });
+    });
+  }, [walletSelector]);
 
-        axios({
-          method: "GET",
-          url: "/api/keypair",
-        }).then((response: any) => {
-          setRsaKeyPair({
-            public: response.data.public,
-            private: response.data.private,
-          });
-        });
-      })
-      .then(() => {
-        const keyStore = new keyStores.BrowserLocalStorageKeyStore();
-        const config: ConnectConfig = {
-          networkId: "testnet",
-          keyStore: keyStore, // first create a key store
-          nodeUrl: "https://rpc.testnet.near.org",
-          walletUrl: "https://wallet.testnet.near.org",
-          helperUrl: "https://helper.testnet.near.org",
-          headers: {},
-        };
-        connect(config).then((nearConnection) => {
-          setNearConnection(nearConnection);
+  useEffect(() => {
+    if (!walletSelector || !signedIn) return;
+    const accountId = walletSelector.store.getState().accounts[0].accountId;
+    setAccountId(accountId);
 
-          nearConnection.account(accountId).then((account: Account) => {
-            setNearAccount(account);
-            account.getAccountBalance().then((balance_yoctonear) => {
-              setBalanceYoctoNear(balance_yoctonear.total);
-            });
-          });
+    axios({
+      method: "GET",
+      url: "/api/keypair",
+    }).then((response: any) => {
+      setRsaKeyPair({
+        public: response.data.public,
+        private: response.data.private,
+      });
+    });
+  }, [walletSelector, signedIn]);
+
+  useEffect(() => {
+    if (!accountId) return;
+
+    const keyStore = new keyStores.BrowserLocalStorageKeyStore();
+    const config: ConnectConfig = {
+      networkId: "testnet",
+      keyStore: keyStore, // first create a key store
+      nodeUrl: "https://rpc.testnet.near.org",
+      walletUrl: "https://wallet.testnet.near.org",
+      helperUrl: "https://helper.testnet.near.org",
+      headers: {},
+    };
+    connect(config).then((nearConnection) => {
+      setNearConnection(nearConnection);
+
+      nearConnection.account(accountId).then((account: Account) => {
+        setNearAccount(account);
+        account.getAccountBalance().then((balance_yoctonear) => {
+          setBalanceYoctoNear(balance_yoctonear.total);
         });
       });
-    setInitialized(true);
-  }, [initialized]);
+    });
+  }, [accountId]);
 
   useEffect(() => {
     if (!nearConnection || !accountId) return;
