@@ -86,14 +86,15 @@ export default function Home() {
     }).then((walletSelector) => {
       setWalletSelector(walletSelector);
       setSignedIn(walletSelector.isSignedIn());
-      walletSelector.wallet().then((wallet: any) => {
-        setWallet(wallet);
-      });
     });
   }, [walletSelector]);
 
   useEffect(() => {
     if (!walletSelector || !signedIn) return;
+    walletSelector.wallet().then((wallet: any) => {
+      setWallet(wallet);
+    });
+
     const accountId = walletSelector.store.getState().accounts[0].accountId;
     setAccountId(accountId);
 

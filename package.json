@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@emotion/react": "^11.10.5",
     "@near-wallet-selector/core": "^7.2.0",
     "@near-wallet-selector/modal-ui": "^7.2.0",
     "@near-wallet-selector/my-near-wallet": "^7.2.0",
@@ -19,19 +18,16 @@
     "@types/openseadragon": "^3.0.4",
     "@types/react": "18.0.25",
     "@types/react-dom": "18.0.8",
+    "axios": "^1.2.0",
     "babel": "^6.23.0",
     "crypto": "^1.0.1",
     "eslint": "8.27.0",
     "eslint-config-next": "13.0.2",
-    "labeler": "^5.0.0",
     "near-api-js": "^0.44.2",
     "next": "13.0.2",
     "openseadragon": "^3.1.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "typescript": "4.8.4"
-  },
-  "devDependencies": {
-    "@emotion/babel-plugin": "^11.10.5"
   }
 }
